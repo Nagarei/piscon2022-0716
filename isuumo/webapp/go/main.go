@@ -252,6 +252,9 @@ func init() {
 var (
 	chairDetailCache  *sc.Cache[int, *Chair]
 	estateDetailCache *sc.Cache[int, *Estate]
+
+	lowPricedChairCache  *sc.Cache[struct{}, []Chair]
+	lowPricedEstateCache *sc.Cache[struct{}, []Estate]
 )
 
 func main() {
@@ -312,6 +315,30 @@ func main() {
 		err = db.Get(&estate, query, id)
 		return &estate, err
 	}, 24*time.Hour, 24*time.Hour)
+	lowPricedChairCache = sc.NewMust(func(_ context.Context, _ struct{}) ([]Chair, error) {
+		var chairs []Chair
+		query := `SELECT * FROM chair WHERE in_stock = 1 ORDER BY price ASC, id ASC LIMIT ?`
+		err := db.Select(&chairs, query, Limit)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return []Chair{}, nil
+			}
+			return nil, err
+		}
+		return chairs, nil
+	}, 24*time.Hour, 24*time.Hour)
+	lowPricedEstateCache = sc.NewMust(func(_ context.Context, _ struct{}) ([]Estate, error) {
+		estates := make([]Estate, 0, Limit)
+		query := `SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT ?`
+		err := db.Select(&estates, query, Limit)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return []Estate{}, nil
+			}
+			return nil, err
+		}
+		return estates, nil
+	}, 24*time.Hour, 24*time.Hour)
 
 	// Start server
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_PORT", "1323"))
@@ -341,6 +368,11 @@ func initialize(c echo.Context) error {
 			return c.NoContent(http.StatusInternalServerError)
 		}
 	}
+
+	chairDetailCache.Purge()
+	estateDetailCache.Purge()
+	lowPricedChairCache.Purge()
+	lowPricedEstateCache.Purge()
 
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
@@ -429,6 +461,9 @@ func postChair(c echo.Context) error {
 		c.Logger().Errorf("failed to insert chair: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	lowPricedChairCache.Purge()
+
 	return c.NoContent(http.StatusCreated)
 }
 
@@ -618,6 +653,7 @@ func buyChair(c echo.Context) error {
 	}
 
 	chairDetailCache.Forget(id)
+	lowPricedChairCache.Purge()
 
 	return c.NoContent(http.StatusOK)
 }
@@ -627,9 +663,7 @@ func getChairSearchCondition(c echo.Context) error {
 }
 
 func getLowPricedChair(c echo.Context) error {
-	var chairs []Chair
-	query := `SELECT * FROM chair WHERE in_stock = 1 ORDER BY price ASC, id ASC LIMIT ?`
-	err := db.Select(&chairs, query, Limit)
+	chairs, err := lowPricedChairCache.Get(context.Background(), struct{}{})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.Logger().Error("getLowPricedChair not found")
@@ -731,6 +765,9 @@ func postEstate(c echo.Context) error {
 		c.Logger().Errorf("failed to insert estate: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	lowPricedEstateCache.Purge()
+
 	return c.NoContent(http.StatusCreated)
 }
 
@@ -858,9 +895,7 @@ func searchEstates(c echo.Context) error {
 }
 
 func getLowPricedEstate(c echo.Context) error {
-	estates := make([]Estate, 0, Limit)
-	query := `SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT ?`
-	err := db.Select(&estates, query, Limit)
+	estates, err := lowPricedEstateCache.Get(context.Background(), struct{}{})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.Logger().Error("getLowPricedEstate not found")

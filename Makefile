@@ -59,6 +59,7 @@ alp:
 discocat-alp:
 	@make refresh-descocat-tmp
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
+	echo "" >> $(DISCOCAT_TMPFILE)
 	@make alp >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TMPFILE) | discocat
@@ -210,6 +211,7 @@ discocat-now-status:
 	@make refresh-descocat-tmp
 	echo "----------------------------------------------------------------" >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
+	echo "SERVER_ID: $(SERVER_ID)" >> $(DISCOCAT_TMPFILE)
 	TZ=JST-9 date >> $(DISCOCAT_TMPFILE)
 	echo "" >> $(DISCOCAT_TMPFILE)
 	git show -s >> $(DISCOCAT_TMPFILE)
