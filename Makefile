@@ -20,6 +20,8 @@ DB_SLOW_LOG:=/var/log/mysql/mysql-slow.log
 NETDATA_WEBROOT_PATH:=/var/lib/netdata/www
 NETDATA_CUSTUM_HTML:=tool-config/netdata/isucon.html
 
+DISCOCAT_TMPFILE:= tmp/discocat
+
 # メインで使うコマンド ------------------------
 
 # サーバーの環境構築　ツールのインストール、gitまわりのセットアップ
@@ -43,10 +45,22 @@ bench: check-server-id mv-logs build deploy-conf restart watch-service-log
 slow-query:
 	sudo pt-query-digest $(DB_SLOW_LOG)
 
+.PHONY: discocat-slow-query
+discocat-slow-query:
+	@make slow-query | discocat
+
 # alpでアクセスログを確認する
 .PHONY: alp
 alp:
 	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml
+
+.PHONY: discocat-alp
+discocat-alp:
+	rm -f $(DISCOCAT_TMPFILE)
+	echo "```" > $(DISCOCAT_TMPFILE)
+	@make alp > $(DISCOCAT_TMPFILE)
+	echo "```" > $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TMPFILE) | discocat
 
 # pprofで記録する
 .PHONY: pprof-record

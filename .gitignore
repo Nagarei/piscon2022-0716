@@ -24,3 +24,5 @@ env.sh
 
 logs
 pprof
+
+tmp
