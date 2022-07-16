@@ -207,6 +207,9 @@ refresh-descocat-tmp:
 .PHONY: discocat-now-status
 discocat-now-status:
 	@make refresh-descocat-tmp
+	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	TZ=JST-9 date >> $(DISCOCAT_TMPFILE)
+	echo "" >> $(DISCOCAT_TMPFILE)
 	git show -s >> $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TMPFILE) | discocat
