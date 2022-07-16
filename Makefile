@@ -58,12 +58,13 @@ alp:
 .PHONY: discocat-alp
 discocat-alp:
 	rm -f $(DISCOCAT_TMPFILE)
-	mkdir tmp
-	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) > $(DISCOCAT_TMPFILE)
-	echo "\n"  > $(DISCOCAT_TMPFILE)
-	@make alp > $(DISCOCAT_TMPFILE)
-	echo "\n"  > $(DISCOCAT_TMPFILE)
-	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) > $(DISCOCAT_TMPFILE)
+	mkdir -p tmp
+	touch $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
+	echo "\n"  >> $(DISCOCAT_TMPFILE)
+	@make alp >> $(DISCOCAT_TMPFILE)
+	echo "\n"  >> $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TMPFILE) | discocat
 
 # pprofで記録する
