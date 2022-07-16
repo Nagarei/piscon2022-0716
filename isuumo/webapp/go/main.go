@@ -326,6 +326,29 @@ func initialize(c echo.Context) error {
 		}
 	}
 
+	{
+		chair := make([]Chair, 0)
+		err := db.Select(&chair, `SELECT * FROM chair`)
+		if err != nil {
+			c.Logger().Errorf("getLowPricedEstate DB execution error : %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		for _, c := range chair {
+			chairDetailCache.Store(c.ID, c)
+		}
+	}
+	{
+		estates := make([]Estate, 0)
+		err := db.Select(&estates, `SELECT * FROM estate`)
+		if err != nil {
+			c.Logger().Errorf("getLowPricedEstate DB execution error : %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		for _, e := range estates {
+			estateDetailCache.Store(e.ID, e)
+		}
+	}
+
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
