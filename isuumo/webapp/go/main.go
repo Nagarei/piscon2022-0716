@@ -12,8 +12,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	_ "net/http/pprof"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
@@ -46,7 +48,7 @@ type Chair struct {
 	Features    string `db:"features" json:"features"`
 	Kind        string `db:"kind" json:"kind"`
 	Popularity  int64  `db:"popularity" json:"-"`
-	PopularityM int64   `db:"popularity_m" json:"-"`
+	PopularityM int64  `db:"popularity_m" json:"-"`
 	Stock       int64  `db:"stock" json:"-"`
 	InStock     bool   `db:"in_stock" json:"-"`
 }
@@ -242,6 +244,11 @@ func init() {
 	json.Unmarshal(jsonText, &estateSearchCondition)
 }
 
+var (
+	chairDetailCache  sync.Map = sync.Map{}
+	estateDetailCache sync.Map = sync.Map{}
+)
+
 func main() {
 
 	go func() {
@@ -371,6 +378,7 @@ func postChair(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	defer tx.Rollback()
+	var new_chair []Chair
 	for _, row := range records {
 		rm := RecordMapper{Record: row}
 		id := rm.NextInt()
@@ -395,10 +403,19 @@ func postChair(c echo.Context) error {
 			c.Logger().Errorf("failed to insert chair: %v", err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
+		new_chair = append(new_chair, Chair{
+			ID: int64(id), Name: name,
+			Description: description, Thumbnail: thumbnail, Price: int64(price),
+			Height: int64(height), Width: int64(width), Depth: int64(depth),
+			Color: color, Features: features, Kind: kind, Popularity: int64(popularity),
+		})
 	}
 	if err := tx.Commit(); err != nil {
 		c.Logger().Errorf("failed to commit tx: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
+	}
+	for _, e := range new_chair {
+		chairDetailCache.Store(e.ID, e)
 	}
 	return c.NoContent(http.StatusCreated)
 }
@@ -669,6 +686,7 @@ func postEstate(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	defer tx.Rollback()
+	var new_estates []Estate
 	for _, row := range records {
 		rm := RecordMapper{Record: row}
 		id := rm.NextInt()
@@ -692,10 +710,19 @@ func postEstate(c echo.Context) error {
 			c.Logger().Errorf("failed to insert estate: %v", err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
+		new_estates = append(new_estates, Estate{
+			ID: int64(id), Name: name,
+			Description: description, Thumbnail: thumbnail, Address: address,
+			Latitude: latitude, Longitude: longitude, Rent: int64(rent),
+			DoorHeight: int64(doorHeight), DoorWidth: int64(doorWidth), Features: features, Popularity: int64(popularity),
+		})
 	}
 	if err := tx.Commit(); err != nil {
 		c.Logger().Errorf("failed to commit tx: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
+	}
+	for _, e := range new_estates {
+		estateDetailCache.Store(e.ID, e)
 	}
 	return c.NoContent(http.StatusCreated)
 }
