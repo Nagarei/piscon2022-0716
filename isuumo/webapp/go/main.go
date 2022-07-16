@@ -73,6 +73,7 @@ type Estate struct {
 	Longitude   float64     `db:"longitude" json:"longitude"`
 	Address     string      `db:"address" json:"address"`
 	Rent        int64       `db:"rent" json:"rent"`
+	RentRange   int64       `db:"rent_range" json:"-"`
 	DoorHeight  int64       `db:"door_height" json:"doorHeight"`
 	DoorWidth   int64       `db:"door_width" json:"doorWidth"`
 	Features    string      `db:"features" json:"features"`
@@ -814,20 +815,26 @@ func searchEstates(c echo.Context) error {
 	}
 
 	if c.QueryParam("rentRangeId") != "" {
-		estateRent, err := getRange(estateSearchCondition.Rent, c.QueryParam("rentRangeId"))
-		if err != nil {
-			c.Echo().Logger.Infof("rentRangeID invalid, %v : %v", c.QueryParam("rentRangeId"), err)
+		// estateRent, err := getRange(estateSearchCondition.Rent, c.QueryParam("rentRangeId"))
+		// if err != nil {
+		// 	c.Echo().Logger.Infof("rentRangeID invalid, %v : %v", c.QueryParam("rentRangeId"), err)
+		// 	return c.NoContent(http.StatusBadRequest)
+		// }
+		//
+		// if estateRent.Min != -1 {
+		// 	conditions = append(conditions, "rent >= ?")
+		// 	params = append(params, estateRent.Min)
+		// }
+		// if estateRent.Max != -1 {
+		// 	conditions = append(conditions, "rent < ?")
+		// 	params = append(params, estateRent.Max)
+		// }
+
+		rangeIndex, err := strconv.Atoi(c.QueryParam("rentRangeId"))
+		if err != nil && !(0 <= rangeIndex && rangeIndex <= 3) {
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if estateRent.Min != -1 {
-			conditions = append(conditions, "rent >= ?")
-			params = append(params, estateRent.Min)
-		}
-		if estateRent.Max != -1 {
-			conditions = append(conditions, "rent < ?")
-			params = append(params, estateRent.Max)
-		}
+		conditions = append(conditions, "rent_range="+strconv.Itoa(rangeIndex))
 	}
 
 	if c.QueryParam("features") != "" {

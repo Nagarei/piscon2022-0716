@@ -37,12 +37,21 @@ CREATE TABLE isuumo.chair
     stock       INTEGER         NOT NULL
 );
 
+ALTER TABLE isuumo.estate ADD COLUMN `rent_range` INTEGER AS (
+    WHEN                    rent <  50000 THEN 0
+    WHEN  50000 <= rent AND rent < 100000 THEN 1
+    WHEN 100000 <= rent AND rent < 150000 THEN 2
+    WHEN 150000 <= rent THEN 3
+) STORED;
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
+ALTER TABLE isuumo.estate ADD KEY `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
 -- explain SELECT * FROM estate WHERE rent >= 100000 AND rent < 150000 ORDER BY popularity_m ASC, id ASC LIMIT 25 OFFSET 75;
 
-ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
+ALTER TABLE isuumo.estate ADD KEY `rent_range` (`rent_range`);
 -- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
+
+ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
 -- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
 
 ALTER TABLE isuumo.estate ADD INDEX `door_height` (`door_height`);
@@ -72,6 +81,9 @@ ALTER TABLE isuumo.chair ADD INDEX `in_stock_width` (`in_stock`, `width`);
 --  EXPLAIN SELECT COUNT(*) FROM chair WHERE width >= 80 AND width < 110 AND `in_stock` = 1;
 ALTER TABLE isuumo.chair ADD INDEX `in_stock_depth` (`in_stock`, `depth`);
 --  EXPLAIN SELECT COUNT(*) FROM chair WHERE depth >= 110 AND depth < 150 AND `in_stock` = 1;
+
+
+
 
 ALTER TABLE isuumo.estate ADD COLUMN `point` GEOMETRY GENERATED ALWAYS AS (Point(latitude, longitude)) STORED;
 -- Bug of MySQL 5.7.20 https://bugs.mysql.com/bug.php?id=88972
