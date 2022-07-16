@@ -59,6 +59,7 @@ alp:
 discocat-alp:
 	@make refresh-descocat-tmp
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
+	echo "" >> $(DISCOCAT_TMPFILE)
 	@make alp >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TMPFILE) | discocat
