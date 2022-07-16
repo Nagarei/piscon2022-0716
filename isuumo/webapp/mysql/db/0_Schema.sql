@@ -57,19 +57,19 @@ ALTER TABLE isuumo.estate ADD COLUMN `door_height_range` INTEGER AS (CASE
 END) STORED;
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
-ALTER TABLE isuumo.estate ADD KEY `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
 -- explain SELECT * FROM estate WHERE rent >= 100000 AND rent < 150000 ORDER BY popularity_m ASC, id ASC LIMIT 25 OFFSET 75;
 
-ALTER TABLE isuumo.estate ADD KEY `rent_range` (`rent_range`);
--- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
 
 ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
 -- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
 
-ALTER TABLE isuumo.estate ADD INDEX `door_height` (`door_height`);
+ALTER TABLE isuumo.estate ADD INDEX `door_height_door_width_rent_range_popularity_m_id` (`door_height_range`, `door_width_range`, `rent_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.estate ADD INDEX `door_height_rent_range_popularity_m_id` (`door_height_range`, `rent_range`), `popularity_m`, `id`;
+ALTER TABLE isuumo.estate ADD INDEX `door_width_rent_range_popularity_m_id` (`door_width_range`, `rent_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.estate ADD INDEX `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_height >= 110 AND door_height < 150;
-ALTER TABLE isuumo.estate ADD INDEX `door_width` (`door_width`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_width >= 80 AND door_width < 110\G;
+-- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
 
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.chair ADD COLUMN `in_stock` BOOLEAN AS (`stock` != 0) STORED;
