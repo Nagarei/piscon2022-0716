@@ -312,7 +312,7 @@ func main() {
 	if err != nil {
 		e.Logger.Fatalf("DB connection failed : %v", err)
 	}
-	chairDb.SetMaxOpenConns(10)
+	chairDb.SetMaxOpenConns(30)
 	defer chairDb.Close()
 
 	mySQLConnectionDataEstate = NewMySQLConnectionEnv("MYSQL_ESTATE_HOST")
@@ -321,7 +321,7 @@ func main() {
 	if err != nil {
 		e.Logger.Fatalf("DB connection failed : %v", err)
 	}
-	estateDb.SetMaxOpenConns(10)
+	estateDb.SetMaxOpenConns(30)
 	defer estateDb.Close()
 
 	chairDetailCache = sc.NewMust[int, *Chair](func(_ context.Context, id int) (*Chair, error) {
