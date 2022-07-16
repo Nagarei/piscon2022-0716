@@ -37,12 +37,12 @@ CREATE TABLE isuumo.chair
     stock       INTEGER         NOT NULL
 );
 
-ALTER TABLE isuumo.estate ADD COLUMN `rent_range` INTEGER AS (
+ALTER TABLE isuumo.estate ADD COLUMN `rent_range` INTEGER AS (CASE
     WHEN                    rent <  50000 THEN 0
     WHEN  50000 <= rent AND rent < 100000 THEN 1
     WHEN 100000 <= rent AND rent < 150000 THEN 2
     WHEN 150000 <= rent THEN 3
-) STORED;
+END) STORED;
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
 ALTER TABLE isuumo.estate ADD KEY `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
