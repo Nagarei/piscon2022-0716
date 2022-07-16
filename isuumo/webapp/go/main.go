@@ -296,7 +296,7 @@ func main() {
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// e.JSONSerializer = &JSONSerializer{}
+	e.JSONSerializer = &JSONSerializer{}
 
 	// Initialize
 	e.POST("/initialize", initialize)
