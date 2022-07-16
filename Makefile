@@ -48,7 +48,11 @@ slow-query:
 
 .PHONY: discocat-slow-query
 discocat-slow-query:
-	@make slow-query | discocat
+	@make refresh-descocat-tmp
+	echo "SERVER_ID: $(SERVER_ID)" >> $(DISCOCAT_TMPFILE)
+	echo "" >> $(DISCOCAT_TMPFILE)
+	@make slow-query >> $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TMPFILE) | discocat
 
 # alpでアクセスログを確認する
 .PHONY: alp
@@ -59,6 +63,8 @@ alp:
 discocat-alp:
 	@make refresh-descocat-tmp
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
+	echo "" >> $(DISCOCAT_TMPFILE)
+	echo "SERVER_ID: $(SERVER_ID)" >> $(DISCOCAT_TMPFILE)
 	echo "" >> $(DISCOCAT_TMPFILE)
 	@make alp >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
