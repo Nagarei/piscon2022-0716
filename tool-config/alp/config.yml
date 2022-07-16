@@ -15,6 +15,7 @@ matching_groups:            # array
   - /api/estate/search?.+
 
   - /images/estate/.+
+  - /images/chair/.+
   - /_next/static/.+
 
 
