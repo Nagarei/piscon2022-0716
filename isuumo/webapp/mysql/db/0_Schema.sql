@@ -73,3 +73,9 @@ ALTER TABLE isuumo.chair ADD INDEX `in_stock_width` (`in_stock`, `width`);
 ALTER TABLE isuumo.chair ADD INDEX `in_stock_depth` (`in_stock`, `depth`);
 --  EXPLAIN SELECT COUNT(*) FROM chair WHERE depth >= 110 AND depth < 150 AND `in_stock` = 1;
 
+ALTER TABLE isuumo.estate ADD COLUMN `point` GEOMETRY GENERATED ALWAYS AS (Point(latitude, longitude)) STORED;
+-- Bug of MySQL 5.7.20 https://bugs.mysql.com/bug.php?id=88972
+ALTER TABLE isuumo.estate MODIFY COLUMN `point` GEOMETRY AS (POINT(latitude, longitude)) STORED NOT NULL;
+ALTER TABLE isuumo.estate ADD SPATIAL INDEX `point` (`point`);
+-- EXPLAIN SELECT * FROM estate WHERE ST_Contains(ST_PolygonFromText('POLYGON((-71.1776585052917 42.3902909739571,-71.1776820268866 42.3903701743239,
+-- -71.1776063012595 42.3903825660754,-71.1775826583081 42.3903033653531,-71.1776585052917 42.3902909739571))'), point) ORDER BY popularity_m ASC, id ASC LIMIT 50;
