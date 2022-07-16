@@ -38,9 +38,6 @@ CREATE TABLE isuumo.chair
 );
 
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
-ALTER TABLE isuumo.estate ADD INDEX `popularity_m_id` (`popularity_m`, `id`);
-ALTER TABLE isuumo.estate ADD INDEX `color_in_stock_popularity_m_id` (`color`, `in_stock`, `popularity_m`, `id`);
-ALTER TABLE isuumo.estate ADD KEY `in_stock_color` (`in_stock`, `color`);
 
 
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
