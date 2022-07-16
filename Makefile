@@ -5,8 +5,8 @@ include env.sh
 
 # 問題によって変わる変数
 USER:=isucon
-BIN_NAME:=isucondition
-BUILD_DIR:=/home/isucon/webapp/go
+BIN_NAME:=isuumo
+BUILD_DIR:=/home/isucon/isuumo/webapp/go
 SERVICE_NAME:=$(BIN_NAME).go.service
 
 DB_PATH:=/etc/mysql
@@ -14,7 +14,7 @@ NGINX_PATH:=/etc/nginx
 SYSTEMD_PATH:=/etc/systemd/system
 
 NGINX_LOG:=/var/log/nginx/access.log
-DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
+DB_SLOW_LOG:=/var/log/mysql/mysql-slow.log
 
 NETDATA_WEBROOT_PATH:=/opt/netdata/usr/share/netdata/web
 NETDATA_CUSTUM_HTML:=tool-config/netdata/isucon.html
@@ -160,13 +160,12 @@ restart:
 .PHONY: mv-logs
 mv-logs:
 	$(eval when := $(shell date "+%s"))
-	mkdir -p ~/logs/$(when)
-ifeq ("$(wildcard $(NGINX_LOG))", "")
-	sudo mv -f $(NGINX_LOG) ~/logs/nginx/$(when)/
-endif
-ifeq ("$(wildcard $(DB_SLOW_LOG)))", "")
-	sudo mv -f $(DB_SLOW_LOG) ~/logs/mysql/$(when)/
-endif
+	sudo test -f $(NGINX_LOG) && \
+            mkdir -p ~/logs/nginx/$(when) && \
+	    sudo mv -f $(NGINX_LOG) ~/logs/nginx/$(when)/ || echo ""
+	sudo test -f $(DB_SLOW_LOG) && \
+		mkdir -p ~/logs/mysql/$(when) && \
+		sudo mv -f $(DB_SLOW_LOG) ~/logs/mysql/$(when)/ || echo ""
 
 
 .PHONY: watch-service-log

@@ -6,7 +6,7 @@ bench
 local
 go
 
-!webapp/go
+!isuumo/webapp/go
 
 # 使わない言語
 isuumo/webapp/frontend
