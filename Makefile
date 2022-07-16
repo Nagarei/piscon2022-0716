@@ -58,6 +58,7 @@ alp:
 .PHONY: discocat-alp
 discocat-alp:
 	rm -f $(DISCOCAT_TMPFILE)
+	mkdir tmp
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) > $(DISCOCAT_TMPFILE)
 	echo "\n"  > $(DISCOCAT_TMPFILE)
 	@make alp > $(DISCOCAT_TMPFILE)
