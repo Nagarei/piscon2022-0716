@@ -1,0 +1,13 @@
+.DS_*
+*.log
+**/*.backup.*
+**/*.back.*
+
+node_modules
+bower_components
+bench
+agreed
+initial-data/description.txt
+initial-data/make_verification_data/main
+provisioning
+
