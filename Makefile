@@ -39,7 +39,7 @@ deploy-conf: check-server-id deploy-db-conf deploy-nginx-conf deploy-service-fil
 
 # ベンチマークを走らせる直前に実行する
 .PHONY: bench
-bench: check-server-id rm-logs build deploy-conf restart watch-service-log
+bench: check-server-id discocat-now-status rm-logs build deploy-conf restart watch-service-log
 
 # slow queryを確認する
 .PHONY: slow-query
@@ -59,9 +59,7 @@ alp:
 discocat-alp:
 	@make refresh-descocat-tmp
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
-	echo "\n"  >> $(DISCOCAT_TMPFILE)
 	@make alp >> $(DISCOCAT_TMPFILE)
-	echo "\n"  >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TMPFILE) | discocat
 
