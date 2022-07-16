@@ -20,7 +20,8 @@ DB_SLOW_LOG:=/var/log/mysql/mysql-slow.log
 NETDATA_WEBROOT_PATH:=/var/lib/netdata/www
 NETDATA_CUSTUM_HTML:=tool-config/netdata/isucon.html
 
-DISCOCAT_TMPFILE:= tmp/discocat
+DISCOCAT_TRIPLE_BACK_QUOTES:=tool-config/discocat/triple-back-quotes.txt
+DISCOCAT_TMPFILE:=tmp/discocat
 
 # メインで使うコマンド ------------------------
 
@@ -57,9 +58,11 @@ alp:
 .PHONY: discocat-alp
 discocat-alp:
 	rm -f $(DISCOCAT_TMPFILE)
-	echo "```" > $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) > $(DISCOCAT_TMPFILE)
+	echo "\n"  > $(DISCOCAT_TMPFILE)
 	@make alp > $(DISCOCAT_TMPFILE)
-	echo "```" > $(DISCOCAT_TMPFILE)
+	echo "\n"  > $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) > $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TMPFILE) | discocat
 
 # pprofで記録する
