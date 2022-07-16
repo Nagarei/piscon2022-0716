@@ -210,6 +210,7 @@ discocat-now-status:
 	@make refresh-descocat-tmp
 	echo "----------------------------------------------------------------" >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
+	echo "SERVER_ID: $(SERVER_ID)"
 	TZ=JST-9 date >> $(DISCOCAT_TMPFILE)
 	echo "" >> $(DISCOCAT_TMPFILE)
 	git show -s >> $(DISCOCAT_TMPFILE)
