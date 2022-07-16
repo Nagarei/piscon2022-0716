@@ -5,18 +5,12 @@ query_string: true              # boolean
 output: count,5xx,method,uri,min,max,sum,avg,p99                    # string(comma separated)
 
 matching_groups:            # array
-  - /api/isu/.+/icon
-  - /api/isu/.+/graph
-  - /api/isu/.+/condition
-  - /api/isu/[-a-z0-9]+
-  - /api/condition/[-a-z0-9]+
-  - /api/catalog/.+
+  - /api/chair/buy/[-a-z0-9]+
+  - /api/chair/[-a-z0-9]+
 
-  - /isu/.+/graph
-  - /isu/.+/condition
-  - /isu/[-a-z0-9]+
-
-  - \?jwt
+  - /api/estate/req_doc/[-a-z0-9]+
+  - /api/estate/[-a-z0-9]+
+  - /api/recommended_estate/[-a-z0-9]+
 
 
 # file:                       # string
