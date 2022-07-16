@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/csv"
-	"encoding/json"
+
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -17,6 +17,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/goccy/go-json"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
