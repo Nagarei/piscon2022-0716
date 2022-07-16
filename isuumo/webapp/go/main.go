@@ -342,6 +342,9 @@ func initialize(c echo.Context) error {
 		}
 	}
 
+	chairDetailCache.Purge()
+	estateDetailCache.Purge()
+
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
