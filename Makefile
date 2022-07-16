@@ -44,7 +44,7 @@ bench: check-server-id discocat-now-status rm-logs build deploy-conf restart wat
 # slow queryを確認する
 .PHONY: slow-query
 slow-query:
-	sudo pt-query-digest --filter 'length($event->{arg}) <= 2000' $(DB_SLOW_LOG)
+	sudo pt-query-digest --filter 'length($$event->{arg}) <= 2000' $(DB_SLOW_LOG)
 
 .PHONY: discocat-slow-query
 discocat-slow-query:
