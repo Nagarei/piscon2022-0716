@@ -43,6 +43,18 @@ ALTER TABLE isuumo.estate ADD COLUMN `rent_range` INTEGER AS (CASE
     WHEN 100000 <= rent AND rent < 150000 THEN 2
     WHEN 150000 <= rent THEN 3
 END) STORED;
+ALTER TABLE isuumo.estate ADD COLUMN `door_width_range` INTEGER AS (CASE
+    WHEN                    door_width <  80 THEN 0
+    WHEN  80 <= door_width AND door_width < 110 THEN 1
+    WHEN 110 <= door_width AND door_width < 150 THEN 2
+    WHEN 150 <= door_width THEN 3
+END) STORED;
+ALTER TABLE isuumo.estate ADD COLUMN `door_height_range` INTEGER AS (CASE
+    WHEN                    door_height <  80 THEN 0
+    WHEN  80 <= door_height AND door_height < 110 THEN 1
+    WHEN 110 <= door_height AND door_height < 150 THEN 2
+    WHEN 150 <= door_height THEN 3
+END) STORED;
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
 ALTER TABLE isuumo.estate ADD KEY `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
