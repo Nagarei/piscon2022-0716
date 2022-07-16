@@ -42,9 +42,13 @@ type Chair struct {
 	Description string `db:"description" json:"description"`
 	Thumbnail   string `db:"thumbnail" json:"thumbnail"`
 	Price       int64  `db:"price" json:"price"`
+	PriceRange  int64  `db:"price_range" json:"-"`
 	Height      int64  `db:"height" json:"height"`
+	HeightRange int64  `db:"height_range" json:"-"`
 	Width       int64  `db:"width" json:"width"`
+	WidthRange  int64  `db:"width_range" json:"-"`
 	Depth       int64  `db:"depth" json:"depth"`
+	DepthRange  int64  `db:"depth_range" json:"-"`
 	Color       string `db:"color" json:"color"`
 	Features    string `db:"features" json:"features"`
 	Kind        string `db:"kind" json:"kind"`
@@ -472,71 +476,91 @@ func searchChairs(c echo.Context) error {
 	params := make([]interface{}, 0)
 
 	if c.QueryParam("priceRangeId") != "" {
-		chairPrice, err := getRange(chairSearchCondition.Price, c.QueryParam("priceRangeId"))
-		if err != nil {
-			c.Echo().Logger.Infof("priceRangeID invalid, %v : %v", c.QueryParam("priceRangeId"), err)
+		// chairPrice, err := getRange(chairSearchCondition.Price, c.QueryParam("priceRangeId"))
+		// if err != nil {
+		// 	c.Echo().Logger.Infof("priceRangeID invalid, %v : %v", c.QueryParam("priceRangeId"), err)
+		// 	return c.NoContent(http.StatusBadRequest)
+		// }
+
+		// if chairPrice.Min != -1 {
+		// 	conditions = append(conditions, "price >= ?")
+		// 	params = append(params, chairPrice.Min)
+		// }
+		// if chairPrice.Max != -1 {
+		// 	conditions = append(conditions, "price < ?")
+		// 	params = append(params, chairPrice.Max)
+		// }
+		rangeIndex, err := strconv.Atoi(c.QueryParam("priceRangeId"))
+		if err != nil && !(0 <= rangeIndex && rangeIndex <= 3) {
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if chairPrice.Min != -1 {
-			conditions = append(conditions, "price >= ?")
-			params = append(params, chairPrice.Min)
-		}
-		if chairPrice.Max != -1 {
-			conditions = append(conditions, "price < ?")
-			params = append(params, chairPrice.Max)
-		}
+		conditions = append(conditions, "price_range="+strconv.Itoa(rangeIndex))
 	}
 
 	if c.QueryParam("heightRangeId") != "" {
-		chairHeight, err := getRange(chairSearchCondition.Height, c.QueryParam("heightRangeId"))
-		if err != nil {
-			c.Echo().Logger.Infof("heightRangeIf invalid, %v : %v", c.QueryParam("heightRangeId"), err)
+		// chairHeight, err := getRange(chairSearchCondition.Height, c.QueryParam("heightRangeId"))
+		// if err != nil {
+		// 	c.Echo().Logger.Infof("heightRangeIf invalid, %v : %v", c.QueryParam("heightRangeId"), err)
+		// 	return c.NoContent(http.StatusBadRequest)
+		// }
+
+		// if chairHeight.Min != -1 {
+		// 	conditions = append(conditions, "height >= ?")
+		// 	params = append(params, chairHeight.Min)
+		// }
+		// if chairHeight.Max != -1 {
+		// 	conditions = append(conditions, "height < ?")
+		// 	params = append(params, chairHeight.Max)
+		// }
+		rangeIndex, err := strconv.Atoi(c.QueryParam("heightRangeId"))
+		if err != nil && !(0 <= rangeIndex && rangeIndex <= 3) {
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if chairHeight.Min != -1 {
-			conditions = append(conditions, "height >= ?")
-			params = append(params, chairHeight.Min)
-		}
-		if chairHeight.Max != -1 {
-			conditions = append(conditions, "height < ?")
-			params = append(params, chairHeight.Max)
-		}
+		conditions = append(conditions, "height_range="+strconv.Itoa(rangeIndex))
 	}
 
 	if c.QueryParam("widthRangeId") != "" {
-		chairWidth, err := getRange(chairSearchCondition.Width, c.QueryParam("widthRangeId"))
-		if err != nil {
-			c.Echo().Logger.Infof("widthRangeID invalid, %v : %v", c.QueryParam("widthRangeId"), err)
+		// chairWidth, err := getRange(chairSearchCondition.Width, c.QueryParam("widthRangeId"))
+		// if err != nil {
+		// 	c.Echo().Logger.Infof("widthRangeID invalid, %v : %v", c.QueryParam("widthRangeId"), err)
+		// 	return c.NoContent(http.StatusBadRequest)
+		// }
+
+		// if chairWidth.Min != -1 {
+		// 	conditions = append(conditions, "width >= ?")
+		// 	params = append(params, chairWidth.Min)
+		// }
+		// if chairWidth.Max != -1 {
+		// 	conditions = append(conditions, "width < ?")
+		// 	params = append(params, chairWidth.Max)
+		// }
+		rangeIndex, err := strconv.Atoi(c.QueryParam("widthRangeId"))
+		if err != nil && !(0 <= rangeIndex && rangeIndex <= 3) {
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if chairWidth.Min != -1 {
-			conditions = append(conditions, "width >= ?")
-			params = append(params, chairWidth.Min)
-		}
-		if chairWidth.Max != -1 {
-			conditions = append(conditions, "width < ?")
-			params = append(params, chairWidth.Max)
-		}
+		conditions = append(conditions, "width_range="+strconv.Itoa(rangeIndex))
 	}
 
 	if c.QueryParam("depthRangeId") != "" {
-		chairDepth, err := getRange(chairSearchCondition.Depth, c.QueryParam("depthRangeId"))
-		if err != nil {
-			c.Echo().Logger.Infof("depthRangeId invalid, %v : %v", c.QueryParam("depthRangeId"), err)
+		// chairDepth, err := getRange(chairSearchCondition.Depth, c.QueryParam("depthRangeId"))
+		// if err != nil {
+		// 	c.Echo().Logger.Infof("depthRangeId invalid, %v : %v", c.QueryParam("depthRangeId"), err)
+		// 	return c.NoContent(http.StatusBadRequest)
+		// }
+
+		// if chairDepth.Min != -1 {
+		// 	conditions = append(conditions, "depth >= ?")
+		// 	params = append(params, chairDepth.Min)
+		// }
+		// if chairDepth.Max != -1 {
+		// 	conditions = append(conditions, "depth < ?")
+		// 	params = append(params, chairDepth.Max)
+		// }
+		rangeIndex, err := strconv.Atoi(c.QueryParam("depthRangeId"))
+		if err != nil && !(0 <= rangeIndex && rangeIndex <= 3) {
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if chairDepth.Min != -1 {
-			conditions = append(conditions, "depth >= ?")
-			params = append(params, chairDepth.Min)
-		}
-		if chairDepth.Max != -1 {
-			conditions = append(conditions, "depth < ?")
-			params = append(params, chairDepth.Max)
-		}
+		conditions = append(conditions, "depth_range="+strconv.Itoa(rangeIndex))
 	}
 
 	if c.QueryParam("kind") != "" {
