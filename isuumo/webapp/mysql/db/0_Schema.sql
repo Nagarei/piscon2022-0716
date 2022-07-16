@@ -105,12 +105,12 @@ ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) ST
 ALTER TABLE isuumo.chair ADD COLUMN `in_stock` BOOLEAN AS (`stock` != 0) STORED;
 
 
-- ALTER TABLE isuumo.chair ADD KEY `in_stock_pwhd_range_pi` (`in_stock`, `price_range`, `width_range`, `height_range`, `depth_range`, `popularity_m`, `id`);
-- ALTER TABLE isuumo.chair ADD KEY `in_stock_pwh_range_pi` (`in_stock`, `price_range`, `width_range`, `height_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.chair ADD KEY `in_stock_pwhd_range_pi` (`in_stock`, `price_range`, `width_range`, `height_range`, `depth_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.chair ADD KEY `in_stock_pwh_range_pi` (`in_stock`, `price_range`, `width_range`, `height_range`, `popularity_m`, `id`);
 -- ALTER TABLE isuumo.chair ADD KEY `in_stock_pwd_range_pi` (`in_stock`, `price_range`, `width_range`, `depth_range`, `popularity_m`, `id`);
 -- ALTER TABLE isuumo.chair ADD KEY `in_stock_pw_range_pi` (`in_stock`, `price_range`, `width_range`, `popularity_m`, `id`);
 -- ALTER TABLE isuumo.chair ADD KEY `in_stock_phd_range_pi` (`in_stock`, `price_range`, `height_range`, `depth_range`, `popularity_m`, `id`);
-- ALTER TABLE isuumo.chair ADD KEY `in_stock_ph_range_pi` (`in_stock`, `price_range`, `height_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.chair ADD KEY `in_stock_ph_range_pi` (`in_stock`, `price_range`, `height_range`, `popularity_m`, `id`);
 -- ALTER TABLE isuumo.chair ADD KEY `in_stock_pd_range_pi` (`in_stock`, `price_range`, `depth_range`, `popularity_m`, `id`);
 -- ALTER TABLE isuumo.chair ADD KEY `in_stock_p_range_pi` (`in_stock`, `price_range`, `popularity_m`, `id`);
 -- ALTER TABLE isuumo.chair ADD KEY `in_stock_pwhd_range_k_pi` (`in_stock`, `price_range`, `width_range`, `height_range`, `depth_range`, `kind`, `popularity_m`, `id`);
