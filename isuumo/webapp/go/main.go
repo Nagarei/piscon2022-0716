@@ -649,15 +649,19 @@ func getEstateDetail(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	var estate Estate
-	err = db.Get(&estate, "SELECT * FROM estate WHERE id = ?", id)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.Echo().Logger.Infof("getEstateDetail estate id %v not found", id)
-			return c.NoContent(http.StatusNotFound)
-		}
-		c.Echo().Logger.Errorf("Database Execution error : %v", err)
-		return c.NoContent(http.StatusInternalServerError)
+	// var estate Estate
+	// err = db.Get(&estate, "SELECT * FROM estate WHERE id = ?", id)
+	// if err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		c.Echo().Logger.Infof("getEstateDetail estate id %v not found", id)
+	// 		return c.NoContent(http.StatusNotFound)
+	// 	}
+	// 	c.Echo().Logger.Errorf("Database Execution error : %v", err)
+	// 	return c.NoContent(http.StatusInternalServerError)
+	// }
+	estate, ok := estateDetailCache.Load(int64(id))
+	if !ok {
+		return c.NoContent(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, estate)
