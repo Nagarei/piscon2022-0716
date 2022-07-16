@@ -155,13 +155,12 @@ restart:
 .PHONY: mv-logs
 mv-logs:
 	$(eval when := $(shell date "+%s"))
-	mkdir -p ~/logs/$(when)
-ifeq ("$(wildcard $(NGINX_LOG))", "")
-	sudo mv -f $(NGINX_LOG) ~/logs/nginx/$(when)/
-endif
-ifeq ("$(wildcard $(DB_SLOW_LOG)))", "")
-	sudo mv -f $(DB_SLOW_LOG) ~/logs/mysql/$(when)/
-endif
+	sudo test -f $(NGINX_LOG) && \
+            mkdir -p ~/logs/nginx/$(when) && \
+	    sudo mv -f $(NGINX_LOG) ~/logs/nginx/$(when)/ || echo ""
+	sudo test -f $(DB_SLOW_LOG) && \
+		mkdir -p ~/logs/mysql/$(when) && \
+		sudo mv -f $(DB_SLOW_LOG) ~/logs/mysql/$(when)/ || echo ""
 
 
 .PHONY: watch-service-log
