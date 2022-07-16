@@ -45,9 +45,9 @@ ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
 -- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
 -- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
 
-ALTER TABLE isuumo.chair ADD INDEX `door_height` (`door_height`);
+ALTER TABLE isuumo.estate ADD INDEX `door_height` (`door_height`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_height >= 110 AND door_height < 150;
-ALTER TABLE isuumo.chair ADD INDEX `door_width` (`door_width`);
+ALTER TABLE isuumo.estate ADD INDEX `door_width` (`door_width`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_width >= 80 AND door_width < 110\G;
 
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
