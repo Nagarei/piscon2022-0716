@@ -38,12 +38,16 @@ CREATE TABLE isuumo.chair
 );
 
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
-
+ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
+-- explain SELECT * FROM estate WHERE rent >= 100000 AND rent < 150000 ORDER BY popularity_m ASC, id ASC LIMIT 25 OFFSET 75;
 
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.chair ADD COLUMN `in_stock` BOOLEAN AS (`stock` != 0) STORED;
 ALTER TABLE isuumo.chair ADD KEY `in_stock_price_id` (`in_stock`, `price`, `id`);
 -- EXPLAIN SELECT * FROM chair WHERE `in_stock` = 1 ORDER BY price, id LIMIT 20;
+
+ALTER TABLE isuumo.chair ADD KEY `in_stock_popularity_m_id` (`in_stock`, `popularity_m`, `id`);
+-- EXPLAIN SELECT * FROM chair WHERE width >= 110 AND width < 150 AND `in_stock` = 1 ORDER BY popularity_m ASC, id ASC LIMIT 25 OFFSET 0;
 
 ALTER TABLE isuumo.chair ADD INDEX `color_in_stock_popularity_m_id` (`color`, `in_stock`, `popularity_m`, `id`);
 --  explain SELECT * FROM chair WHERE color = 'ネイビー' AND `in_stock` = 1 ORDER BY popularity DESC, id ASC LIMIT 25 OFFSET 0;
