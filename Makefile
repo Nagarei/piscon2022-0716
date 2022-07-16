@@ -16,6 +16,8 @@ SYSTEMD_PATH:=/etc/systemd/system
 NGINX_LOG:=/var/log/nginx/access.log
 DB_SLOW_LOG:=/var/log/mysql/mysql-slow.log
 
+NETDATA_WEBROOT_PATH:=/opt/netdata/usr/share/netdata/web
+NETDATA_CUSTUM_HTML:=tool-config/netdata/isucon.html
 
 # メインで使うコマンド ------------------------
 
@@ -33,7 +35,7 @@ deploy-conf: check-server-id deploy-db-conf deploy-nginx-conf deploy-service-fil
 
 # ベンチマークを走らせる直前に実行する
 .PHONY: bench
-bench: check-server-id mv-logs build deploy-conf restart watch-service-log
+bench: check-server-id mv-logs build deploy-conf netdata-setup restart watch-service-log
 
 # slow queryを確認する
 .PHONY: slow-query
@@ -74,6 +76,9 @@ install-tools:
 	unzip alp_linux_amd64.zip
 	sudo install alp /usr/local/bin/alp
 	rm alp_linux_amd64.zip alp
+
+	# netdataのインストール
+	wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh
 
 .PHONY: git-setup
 git-setup:
@@ -166,3 +171,7 @@ mv-logs:
 .PHONY: watch-service-log
 watch-service-log:
 	sudo journalctl -u $(SERVICE_NAME) -n10 -f
+
+.PHONY: netdata-setup
+netdata-setup:
+	cp $(NETDATA_CUSTUM_HTML) $(NETDATA_WEBROOT_PATH)/index.html
