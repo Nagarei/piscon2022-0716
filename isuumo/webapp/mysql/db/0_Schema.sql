@@ -45,6 +45,11 @@ ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
 -- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
 -- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
 
+ALTER TABLE isuumo.chair ADD INDEX `door_height` (`door_height`);
+--  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_height >= 110 AND door_height < 150;
+ALTER TABLE isuumo.chair ADD INDEX `door_width` (`door_width`);
+--  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_width >= 80 AND door_width < 110\G;
+
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.chair ADD COLUMN `in_stock` BOOLEAN AS (`stock` != 0) STORED;
 
@@ -62,4 +67,9 @@ ALTER TABLE isuumo.chair ADD KEY `in_stock_popularity_m_id` (`in_stock`, `popula
 
 ALTER TABLE isuumo.chair ADD INDEX `color_in_stock_popularity_m_id` (`color`, `in_stock`, `popularity_m`, `id`);
 --  explain SELECT * FROM chair WHERE color = 'ネイビー' AND `in_stock` = 1 ORDER BY popularity DESC, id ASC LIMIT 25 OFFSET 0;
+
+ALTER TABLE isuumo.chair ADD INDEX `in_stock_width` (`in_stock`, `width`);
+--  EXPLAIN SELECT COUNT(*) FROM chair WHERE width >= 80 AND width < 110 AND `in_stock` = 1;
+ALTER TABLE isuumo.chair ADD INDEX `in_stock_depth` (`in_stock`, `depth`);
+--  EXPLAIN SELECT COUNT(*) FROM chair WHERE depth >= 110 AND depth < 150 AND `in_stock` = 1;
 
