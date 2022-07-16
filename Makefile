@@ -174,4 +174,4 @@ watch-service-log:
 
 .PHONY: netdata-setup
 netdata-setup:
-	cp $(NETDATA_CUSTUM_HTML) $(NETDATA_WEBROOT_PATH)/index.html
+	sudo cp $(NETDATA_CUSTUM_HTML) $(NETDATA_WEBROOT_PATH)/index.html
