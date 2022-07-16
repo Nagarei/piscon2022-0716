@@ -16,6 +16,8 @@ SYSTEMD_PATH:=/etc/systemd/system
 NGINX_LOG:=/var/log/nginx/access.log
 DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
 
+NETDATA_WEBROOT_PATH:=/opt/netdata/usr/share/netdata/web
+NETDATA_CUSTUM_HTML:=tool-config/netdata/isucon.html
 
 # メインで使うコマンド ------------------------
 
@@ -33,7 +35,7 @@ deploy-conf: check-server-id deploy-db-conf deploy-nginx-conf deploy-service-fil
 
 # ベンチマークを走らせる直前に実行する
 .PHONY: bench
-bench: check-server-id mv-logs build deploy-conf restart watch-service-log
+bench: check-server-id mv-logs build deploy-conf netdata-setup restart watch-service-log
 
 # slow queryを確認する
 .PHONY: slow-query
@@ -170,3 +172,7 @@ endif
 .PHONY: watch-service-log
 watch-service-log:
 	sudo journalctl -u $(SERVICE_NAME) -n10 -f
+
+.PHONY: netdata-setup
+netdata-setup:
+	cp $(NETDATA_CUSTUM_HTML) $(NETDATA_WEBROOT_PATH)/index.html
