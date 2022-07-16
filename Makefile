@@ -66,7 +66,10 @@ discocat-alp:
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
-	go tool pprof http://localhost:6060/debug/pprof/profile
+	echo "start pprof-record" | discocat
+	go tool pprof -top http://localhost:6060/debug/pprof/profile
+	$(eval latest := $(shell ls -rt pprof/ | tail -n 1))
+	echo "finish pprof-record\ncreated: $(latest)" | discocat
 
 # pprofで確認する
 .PHONY: pprof-check
