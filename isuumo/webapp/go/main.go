@@ -47,6 +47,7 @@ type Chair struct {
 	Kind        string `db:"kind" json:"kind"`
 	Popularity  int64  `db:"popularity" json:"-"`
 	Stock       int64  `db:"stock" json:"-"`
+	InStock     bool   `db:"in_stock" json:"-"`
 }
 
 type ChairSearchResponse struct {
