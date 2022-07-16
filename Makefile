@@ -75,6 +75,9 @@ install-tools:
 	sudo install alp /usr/local/bin/alp
 	rm alp_linux_amd64.zip alp
 
+	# netdataのインストール
+	wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh
+
 .PHONY: git-setup
 git-setup:
 	# git用の設定は適宜変更して良い
