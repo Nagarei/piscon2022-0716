@@ -365,15 +365,15 @@ func getChairDetail(c echo.Context) error {
 	if !ok {
 		return c.NoContent(http.StatusNotFound)
 	}
-	var exists int32
-	err = db.Get(&exists, "SELECT COUNT(*) FROM chair WHERE id = ? AND `in_stock` = 1", id)
-	if err != nil {
-		c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	} else if exists == 0 {
-		//c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
-		return c.NoContent(http.StatusNotFound)
-	}
+	// var exists int32
+	// err = db.Get(&exists, "SELECT COUNT(*) FROM chair WHERE id = ? AND `in_stock` = 1", id)
+	// if err != nil {
+	// 	c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
+	// 	return c.NoContent(http.StatusInternalServerError)
+	// } else if exists == 0 {
+	// 	//c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
+	// 	return c.NoContent(http.StatusNotFound)
+	// }
 
 	// chair := Chair{}
 	// query := `SELECT * FROM chair WHERE id = ?`
@@ -442,12 +442,14 @@ func postChair(c echo.Context) error {
 			c.Logger().Errorf("failed to insert chair: %v", err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		new_chair = append(new_chair, Chair{
-			ID: int64(id), Name: name,
-			Description: description, Thumbnail: thumbnail, Price: int64(price),
-			Height: int64(height), Width: int64(width), Depth: int64(depth),
-			Color: color, Features: features, Kind: kind, Popularity: int64(popularity),
-		})
+		if stock > 0 {
+			new_chair = append(new_chair, Chair{
+				ID: int64(id), Name: name,
+				Description: description, Thumbnail: thumbnail, Price: int64(price),
+				Height: int64(height), Width: int64(width), Depth: int64(depth),
+				Color: color, Features: features, Kind: kind, Popularity: int64(popularity),
+			})
+		}
 	}
 	if err := tx.Commit(); err != nil {
 		c.Logger().Errorf("failed to commit tx: %v", err)
@@ -642,6 +644,9 @@ func buyChair(c echo.Context) error {
 	if err != nil {
 		c.Echo().Logger.Errorf("transaction commit error : %v", err)
 		return c.NoContent(http.StatusInternalServerError)
+	}
+	if chair.Stock == 1 {
+		chairDetailCache.Delete(int64(chair.ID))
 	}
 
 	return c.NoContent(http.StatusOK)
