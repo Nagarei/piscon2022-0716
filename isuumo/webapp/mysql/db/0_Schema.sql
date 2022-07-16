@@ -37,18 +37,39 @@ CREATE TABLE isuumo.chair
     stock       INTEGER         NOT NULL
 );
 
+ALTER TABLE isuumo.estate ADD COLUMN `rent_range` INTEGER AS (CASE
+    WHEN                    rent <  50000 THEN 0
+    WHEN  50000 <= rent AND rent < 100000 THEN 1
+    WHEN 100000 <= rent AND rent < 150000 THEN 2
+    WHEN 150000 <= rent THEN 3
+END) STORED;
+ALTER TABLE isuumo.estate ADD COLUMN `door_width_range` INTEGER AS (CASE
+    WHEN                    door_width <  80 THEN 0
+    WHEN  80 <= door_width AND door_width < 110 THEN 1
+    WHEN 110 <= door_width AND door_width < 150 THEN 2
+    WHEN 150 <= door_width THEN 3
+END) STORED;
+ALTER TABLE isuumo.estate ADD COLUMN `door_height_range` INTEGER AS (CASE
+    WHEN                    door_height <  80 THEN 0
+    WHEN  80 <= door_height AND door_height < 110 THEN 1
+    WHEN 110 <= door_height AND door_height < 150 THEN 2
+    WHEN 150 <= door_height THEN 3
+END) STORED;
 ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
 -- explain SELECT * FROM estate WHERE rent >= 100000 AND rent < 150000 ORDER BY popularity_m ASC, id ASC LIMIT 25 OFFSET 75;
 
+
 ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
--- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
 -- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
 
-ALTER TABLE isuumo.estate ADD INDEX `door_height` (`door_height`);
+ALTER TABLE isuumo.estate ADD INDEX `door_height_door_width_rent_range_popularity_m_id` (`door_height_range`, `door_width_range`, `rent_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.estate ADD INDEX `door_height_rent_range_popularity_m_id` (`door_height_range`, `rent_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.estate ADD INDEX `door_width_rent_range_popularity_m_id` (`door_width_range`, `rent_range`, `popularity_m`, `id`);
+ALTER TABLE isuumo.estate ADD INDEX `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_height >= 110 AND door_height < 150;
-ALTER TABLE isuumo.estate ADD INDEX `door_width` (`door_width`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_width >= 80 AND door_width < 110\G;
+-- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
 
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.chair ADD COLUMN `in_stock` BOOLEAN AS (`stock` != 0) STORED;
@@ -72,6 +93,9 @@ ALTER TABLE isuumo.chair ADD INDEX `in_stock_width` (`in_stock`, `width`);
 --  EXPLAIN SELECT COUNT(*) FROM chair WHERE width >= 80 AND width < 110 AND `in_stock` = 1;
 ALTER TABLE isuumo.chair ADD INDEX `in_stock_depth` (`in_stock`, `depth`);
 --  EXPLAIN SELECT COUNT(*) FROM chair WHERE depth >= 110 AND depth < 150 AND `in_stock` = 1;
+
+
+
 
 ALTER TABLE isuumo.estate ADD COLUMN `point` GEOMETRY GENERATED ALWAYS AS (Point(latitude, longitude)) STORED;
 -- Bug of MySQL 5.7.20 https://bugs.mysql.com/bug.php?id=88972
