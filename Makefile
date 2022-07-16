@@ -205,6 +205,7 @@ refresh-descocat-tmp:
 .PHONY: discocat-now-status
 discocat-now-status:
 	@make refresh-descocat-tmp
+	echo "----------------------------------------------------------------" >> $(DISCOCAT_TMPFILE)
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	TZ=JST-9 date >> $(DISCOCAT_TMPFILE)
 	echo "" >> $(DISCOCAT_TMPFILE)
