@@ -14,6 +14,9 @@ matching_groups:            # array
   - /api/recommended_estate/[0-9]+
   - /api/estate/search?.+
 
+  - /images/estate/.+
+  - /_next/static/.+
+
 
 # file:                       # string
 # query_string_ignore_values: # boolean
