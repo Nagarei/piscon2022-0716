@@ -57,9 +57,7 @@ alp:
 
 .PHONY: discocat-alp
 discocat-alp:
-	rm -f $(DISCOCAT_TMPFILE)
-	mkdir -p tmp
-	touch $(DISCOCAT_TMPFILE)
+	@make refresh-descocat-tmp
 	cat $(DISCOCAT_TRIPLE_BACK_QUOTES) >> $(DISCOCAT_TMPFILE)
 	echo "\n"  >> $(DISCOCAT_TMPFILE)
 	@make alp >> $(DISCOCAT_TMPFILE)
@@ -199,3 +197,16 @@ watch-service-log:
 .PHONY: netdata-setup
 netdata-setup:
 	sudo cp $(NETDATA_CUSTUM_HTML) $(NETDATA_WEBROOT_PATH)/isucon.html
+
+.PHONY: $(DISCOCAT_TMPFILE)
+refresh-descocat-tmp:
+	rm -f $(DISCOCAT_TMPFILE)
+	mkdir -p tmp
+	touch $(DISCOCAT_TMPFILE)
+
+.PHONY: discocat-now-status
+discocat-now-status:
+	@make refresh-descocat-tmp
+	TZ=JST-9 date >> $(DISCOCAT_TMPFILE)
+	git show -s >> $(DISCOCAT_TMPFILE)
+	cat $(DISCOCAT_TMPFILE) | discocat
