@@ -64,7 +64,7 @@ ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
 -- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
 
 ALTER TABLE isuumo.estate ADD INDEX `door_height_door_width_rent_range_popularity_m_id` (`door_height_range`, `door_width_range`, `rent_range`, `popularity_m`, `id`);
-ALTER TABLE isuumo.estate ADD INDEX `door_height_rent_range_popularity_m_id` (`door_height_range`, `rent_range`), `popularity_m`, `id`;
+ALTER TABLE isuumo.estate ADD INDEX `door_height_rent_range_popularity_m_id` (`door_height_range`, `rent_range`, `popularity_m`, `id`);
 ALTER TABLE isuumo.estate ADD INDEX `door_width_rent_range_popularity_m_id` (`door_width_range`, `rent_range`, `popularity_m`, `id`);
 ALTER TABLE isuumo.estate ADD INDEX `rent_range_popularity_m_id` (`rent_range`, `popularity_m`, `id`);
 --  EXPLAIN SELECT COUNT(*) FROM estate WHERE door_height >= 110 AND door_height < 150;
