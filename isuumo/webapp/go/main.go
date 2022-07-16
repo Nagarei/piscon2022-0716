@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/csv"
 	"encoding/json"
@@ -13,15 +14,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
-
-	_ "net/http/pprof"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/motoki317/sc"
 )
 
 const Limit = 20
@@ -248,8 +248,8 @@ func init() {
 }
 
 var (
-	chairDetailCache  sync.Map = sync.Map{}
-	estateDetailCache sync.Map = sync.Map{}
+	chairDetailCache  *sc.Cache[int, *Chair]
+	estateDetailCache *sc.Cache[int, *Estate]
 )
 
 func main() {
@@ -298,6 +298,19 @@ func main() {
 	db.SetMaxOpenConns(10)
 	defer db.Close()
 
+	chairDetailCache = sc.NewMust[int, *Chair](func(_ context.Context, id int) (*Chair, error) {
+		var chair Chair
+		query := `SELECT * FROM chair WHERE id = ?`
+		err = db.Get(&chair, query, id)
+		return &chair, err
+	}, 24*time.Hour, 24*time.Hour)
+	estateDetailCache = sc.NewMust[int, *Estate](func(_ context.Context, id int) (*Estate, error) {
+		var estate Estate
+		query := `SELECT * FROM estate WHERE id = ?`
+		err = db.Get(&estate, query, id)
+		return &estate, err
+	}, 24*time.Hour, 24*time.Hour)
+
 	// Start server
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_PORT", "1323"))
 	e.Logger.Fatal(e.Start(serverPort))
@@ -327,29 +340,6 @@ func initialize(c echo.Context) error {
 		}
 	}
 
-	{
-		chair := make([]Chair, 0)
-		err := db.Select(&chair, `SELECT * FROM chair`)
-		if err != nil {
-			c.Logger().Errorf("getLowPricedEstate DB execution error : %v", err)
-			return c.NoContent(http.StatusInternalServerError)
-		}
-		for _, c := range chair {
-			chairDetailCache.Store(c.ID, c)
-		}
-	}
-	{
-		estates := make([]Estate, 0)
-		err := db.Select(&estates, `SELECT * FROM estate`)
-		if err != nil {
-			c.Logger().Errorf("getLowPricedEstate DB execution error : %v", err)
-			return c.NoContent(http.StatusInternalServerError)
-		}
-		for _, e := range estates {
-			estateDetailCache.Store(e.ID, e)
-		}
-	}
-
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
@@ -362,34 +352,19 @@ func getChairDetail(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	chair, ok := chairDetailCache.Load(int64(id))
-	if !ok {
+	chair, err := chairDetailCache.Get(context.Background(), id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.Echo().Logger.Infof("requested id's chair not found : %v", id)
+			return c.NoContent(http.StatusNotFound)
+		}
+		c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	if chair.Stock <= 0 {
+		c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
 		return c.NoContent(http.StatusNotFound)
 	}
-	// var exists int32
-	// err = db.Get(&exists, "SELECT COUNT(*) FROM chair WHERE id = ? AND `in_stock` = 1", id)
-	// if err != nil {
-	// 	c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
-	// 	return c.NoContent(http.StatusInternalServerError)
-	// } else if exists == 0 {
-	// 	//c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
-	// 	return c.NoContent(http.StatusNotFound)
-	// }
-
-	// chair := Chair{}
-	// query := `SELECT * FROM chair WHERE id = ?`
-	// err = db.Get(&chair, query, id)
-	// if err != nil {
-	// 	if err == sql.ErrNoRows {
-	// 		c.Echo().Logger.Infof("requested id's chair not found : %v", id)
-	// 		return c.NoContent(http.StatusNotFound)
-	// 	}
-	// 	c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
-	// 	return c.NoContent(http.StatusInternalServerError)
-	// } else if chair.Stock <= 0 {
-	// 	c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
-	// 	return c.NoContent(http.StatusNotFound)
-	// }
 
 	return c.JSON(http.StatusOK, chair)
 }
@@ -418,7 +393,6 @@ func postChair(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	defer tx.Rollback()
-	var new_chair []Chair
 	for _, row := range records {
 		rm := RecordMapper{Record: row}
 		id := rm.NextInt()
@@ -443,21 +417,10 @@ func postChair(c echo.Context) error {
 			c.Logger().Errorf("failed to insert chair: %v", err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		if stock > 0 {
-			new_chair = append(new_chair, Chair{
-				ID: int64(id), Name: name,
-				Description: description, Thumbnail: thumbnail, Price: int64(price),
-				Height: int64(height), Width: int64(width), Depth: int64(depth),
-				Color: color, Features: features, Kind: kind, Popularity: int64(popularity),
-			})
-		}
 	}
 	if err := tx.Commit(); err != nil {
 		c.Logger().Errorf("failed to commit tx: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
-	}
-	for _, c := range new_chair {
-		chairDetailCache.Store(c.ID, c)
 	}
 	return c.NoContent(http.StatusCreated)
 }
@@ -646,9 +609,8 @@ func buyChair(c echo.Context) error {
 		c.Echo().Logger.Errorf("transaction commit error : %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	if chair.Stock == 1 {
-		chairDetailCache.Delete(int64(chair.ID))
-	}
+
+	chairDetailCache.Forget(id)
 
 	return c.NoContent(http.StatusOK)
 }
@@ -680,19 +642,14 @@ func getEstateDetail(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	// var estate Estate
-	// err = db.Get(&estate, "SELECT * FROM estate WHERE id = ?", id)
-	// if err != nil {
-	// 	if err == sql.ErrNoRows {
-	// 		c.Echo().Logger.Infof("getEstateDetail estate id %v not found", id)
-	// 		return c.NoContent(http.StatusNotFound)
-	// 	}
-	// 	c.Echo().Logger.Errorf("Database Execution error : %v", err)
-	// 	return c.NoContent(http.StatusInternalServerError)
-	// }
-	estate, ok := estateDetailCache.Load(int64(id))
-	if !ok {
-		return c.NoContent(http.StatusNotFound)
+	estate, err := estateDetailCache.Get(context.Background(), id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.Echo().Logger.Infof("getEstateDetail estate id %v not found", id)
+			return c.NoContent(http.StatusNotFound)
+		}
+		c.Echo().Logger.Errorf("Database Execution error : %v", err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, estate)
@@ -735,7 +692,6 @@ func postEstate(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	defer tx.Rollback()
-	var new_estates []Estate
 	for _, row := range records {
 		rm := RecordMapper{Record: row}
 		id := rm.NextInt()
@@ -759,19 +715,10 @@ func postEstate(c echo.Context) error {
 			c.Logger().Errorf("failed to insert estate: %v", err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		new_estates = append(new_estates, Estate{
-			ID: int64(id), Name: name,
-			Description: description, Thumbnail: thumbnail, Address: address,
-			Latitude: latitude, Longitude: longitude, Rent: int64(rent),
-			DoorHeight: int64(doorHeight), DoorWidth: int64(doorWidth), Features: features, Popularity: int64(popularity),
-		})
 	}
 	if err := tx.Commit(); err != nil {
 		c.Logger().Errorf("failed to commit tx: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
-	}
-	for _, e := range new_estates {
-		estateDetailCache.Store(e.ID, e)
 	}
 	return c.NoContent(http.StatusCreated)
 }
@@ -990,9 +937,7 @@ func postEstateRequestDocument(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	estate := Estate{}
-	query := `SELECT * FROM estate WHERE id = ?`
-	err = db.Get(&estate, query, id)
+	_, err = estateDetailCache.Get(context.Background(), id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.NoContent(http.StatusNotFound)
