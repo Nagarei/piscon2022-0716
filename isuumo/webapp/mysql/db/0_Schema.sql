@@ -41,8 +41,19 @@ ALTER TABLE isuumo.estate ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) S
 ALTER TABLE isuumo.estate ADD KEY `popularity_m_id` (`popularity_m`, `id`);
 -- explain SELECT * FROM estate WHERE rent >= 100000 AND rent < 150000 ORDER BY popularity_m ASC, id ASC LIMIT 25 OFFSET 75;
 
+ALTER TABLE isuumo.estate ADD KEY `rent_id` (`rent`, `id`);
+-- EXPLAIN SELECT COUNT(*) FROM estate WHERE rent >= 100000 AND rent < 150000;
+-- EXPLAIN SELECT * FROM estate ORDER BY rent ASC, id ASC LIMIT 20;
+
 ALTER TABLE isuumo.chair ADD COLUMN `popularity_m` INTEGER AS (-`popularity`) STORED;
 ALTER TABLE isuumo.chair ADD COLUMN `in_stock` BOOLEAN AS (`stock` != 0) STORED;
+
+ALTER TABLE isuumo.chair ADD KEY `in_stock_height` (`in_stock`, `height`);
+-- EXPLAIN SELECT COUNT(*) FROM chair WHERE height >= 80 AND height < 110 AND `in_stock` = 1;
+
+ALTER TABLE isuumo.chair ADD KEY `in_stock_kind` (`in_stock`, `kind`);
+-- EXPLAIN SELECT COUNT(*) FROM chair WHERE kind = 'ゲーミングチェア' AND `in_stock` = 1;
+
 ALTER TABLE isuumo.chair ADD KEY `in_stock_price_id` (`in_stock`, `price`, `id`);
 -- EXPLAIN SELECT * FROM chair WHERE `in_stock` = 1 ORDER BY price, id LIMIT 20;
 
