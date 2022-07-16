@@ -16,7 +16,8 @@ SYSTEMD_PATH:=/etc/systemd/system
 NGINX_LOG:=/var/log/nginx/access.log
 DB_SLOW_LOG:=/var/log/mysql/mysql-slow.log
 
-NETDATA_WEBROOT_PATH:=/var/lib/netdata/www # http://localhost:19999/netdata.confのdirectories.webで確認可能
+# http://localhost:19999/netdata.confのdirectories.webで確認可能
+NETDATA_WEBROOT_PATH:=/var/lib/netdata/www
 NETDATA_CUSTUM_HTML:=tool-config/netdata/isucon.html
 
 # メインで使うコマンド ------------------------
