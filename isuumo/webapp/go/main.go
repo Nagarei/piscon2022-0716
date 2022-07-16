@@ -336,20 +336,34 @@ func getChairDetail(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	chair := Chair{}
-	query := `SELECT * FROM chair WHERE id = ?`
-	err = db.Get(&chair, query, id)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.Echo().Logger.Infof("requested id's chair not found : %v", id)
-			return c.NoContent(http.StatusNotFound)
-		}
-		c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	} else if chair.Stock <= 0 {
-		c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
+	chair, ok := chairDetailCache.Load(int64(id))
+	if !ok {
 		return c.NoContent(http.StatusNotFound)
 	}
+	var exists int32
+	err = db.Get(&exists, "SELECT COUNT(*) FROM chair WHERE id = ? AND `in_stock` = 1", id)
+	if err != nil {
+		c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
+		return c.NoContent(http.StatusInternalServerError)
+	} else if exists == 0 {
+		//c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	// chair := Chair{}
+	// query := `SELECT * FROM chair WHERE id = ?`
+	// err = db.Get(&chair, query, id)
+	// if err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		c.Echo().Logger.Infof("requested id's chair not found : %v", id)
+	// 		return c.NoContent(http.StatusNotFound)
+	// 	}
+	// 	c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
+	// 	return c.NoContent(http.StatusInternalServerError)
+	// } else if chair.Stock <= 0 {
+	// 	c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
+	// 	return c.NoContent(http.StatusNotFound)
+	// }
 
 	return c.JSON(http.StatusOK, chair)
 }
@@ -414,8 +428,8 @@ func postChair(c echo.Context) error {
 		c.Logger().Errorf("failed to commit tx: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	for _, e := range new_chair {
-		chairDetailCache.Store(e.ID, e)
+	for _, c := range new_chair {
+		chairDetailCache.Store(c.ID, c)
 	}
 	return c.NoContent(http.StatusCreated)
 }
